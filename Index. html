@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Attendance & Payroll Pro Executive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-effect { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); }
+        .card-glow { box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.15); }
+        .emerald-glow { box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.2); }
+        .pulse-dot { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+        
+        .loader {
+            width: 36px;
+            height: 36px;
+            border: 4px solid #4f46e5;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 min-h-screen text-slate-800 text-[11px] antialiased flex justify-center items-center p-0 sm:p-4">
+
+    <div class="w-full max-w-md bg-slate-50 min-h-screen sm:min-h-[840px] sm:max-h-[900px] sm:rounded-[2.5rem] flex flex-col shadow-2xl relative overflow-hidden border border-slate-800/30">
+
+        <!-- CLOUD LOADING OVERLAY -->
+        <div id="cloudLoadingOverlay" class="absolute inset-0 bg-slate-950 z-[300] flex flex-col items-center justify-center sm:rounded-[2.5rem] hidden">
+            <span class="loader mb-4"></span>
+            <p class="text-white font-semibold text-xs tracking-wider animate-pulse">Syncing Cloud Data...</p>
+        </div>
+
+        <!-- AUTHENTICATION SCREEN -->
+        <div id="onboardingScreen" class="absolute inset-0 bg-slate-950 z-[200] flex flex-col items-center justify-center px-6 hidden overflow-hidden sm:rounded-[2.5rem]">
+            <div class="absolute top-[-10%] left-[-10%] w-40 h-40 bg-indigo-600 rounded-full mix-blend-multiply filter blur-[50px] opacity-30"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-40 h-40 bg-emerald-600 rounded-full mix-blend-multiply filter blur-[50px] opacity-20"></div>
+            
+            <div class="w-full bg-slate-900/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-700/50 shadow-2xl relative z-10">
+                <div class="text-center mb-5">
+                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/30 border border-indigo-400/30">
+                        <i class="fa-solid fa-user-tie text-2xl text-white"></i>
+                    </div>
+                    <h2 id="authTitle" class="text-xl font-bold text-white tracking-tight">Staff Pro Setup</h2>
+                    <p id="authSub" class="text-[10px] text-slate-400 mt-1">Create your executive dashboard</p>
+                </div>
+                
+                <div class="flex justify-center gap-6 mb-5 border-b border-slate-700">
+                    <button id="tabLogin" onclick="setAuthMode('login')" class="text-slate-500 font-bold text-xs pb-2 border-b-2 border-transparent transition-all">Login</button>
+                    <button id="tabSignup" onclick="setAuthMode('signup')" class="text-indigo-400 font-bold text-xs pb-2 border-b-2 border-indigo-500 transition-all">Naya Account</button>
+                </div>
+
+                <div class="space-y-3.5">
+                    <div id="nameField">
+                        <label class="text-[10px] font-semibold text-slate-300 block mb-1">Your Full Name</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-user text-slate-500 text-[10px]"></i>
+                            </div>
+                            <input type="text" id="profileName" placeholder="e.g., Chand Rashid" class="w-full text-xs pl-8 p-3 rounded-xl border border-slate-700 bg-slate-800 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition placeholder-slate-500">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-300 block mb-1">Email Address</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-envelope text-slate-500 text-[10px]"></i>
+                            </div>
+                            <input type="email" id="profileEmail" placeholder="your@email.com" class="w-full text-xs pl-8 p-3 rounded-xl border border-slate-700 bg-slate-800 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition placeholder-slate-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-300 block mb-1">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-lock text-slate-500 text-[10px]"></i>
+                            </div>
+                            <input type="password" id="profilePassword" placeholder="Enter password" class="w-full text-xs pl-8 p-3 rounded-xl border border-slate-700 bg-slate-800 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition placeholder-slate-500">
+                        </div>
+                    </div>
+
+                    <div id="confirmPassField">
+                        <label class="text-[10px] font-semibold text-slate-300 block mb-1">Confirm Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-shield-halved text-slate-500 text-[10px]"></i>
+                            </div>
+                            <input type="password" id="profileConfirmPassword" placeholder="Confirm password" class="w-full text-xs pl-8 p-3 rounded-xl border border-slate-700 bg-slate-800 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition placeholder-slate-500">
+                        </div>
+                    </div>
+
+                    <button id="authSubmitBtn" onclick="handleAuthSubmit()" class="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-800 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 active:scale-95 transition-all border border-indigo-500/30">
+                        Create Account <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBSCRIPTION LOCK SCREEN -->
+        <div id="subscriptionScreen" class="absolute inset-0 bg-slate-950 z-[180] flex flex-col px-4 hidden overflow-y-auto sm:rounded-[2.5rem] pb-8">
+            <div class="pt-10 pb-6 text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-rose-500 to-rose-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-rose-500/30 border border-rose-400/30">
+                    <i class="fa-solid fa-lock text-2xl text-white"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white tracking-tight">Recharge Required / Expired</h2>
+                <p id="expiryReasonText" class="text-[11px] text-slate-400 mt-2 max-w-[250px] mx-auto leading-relaxed">Aapka recharge plan ya trial khatam ho chuka hai. App ko chalane ke liye dobara recharge karein.</p>
+            </div>
+            
+            <div class="space-y-4 max-w-sm mx-auto w-full">
+                <div onclick="initiatePayment(15, 'subscription', 28)" class="bg-slate-900 border border-slate-700 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-indigo-500 active:scale-95 transition group">
+                    <div>
+                        <h3 class="text-indigo-400 font-bold text-sm">28 Din Plan</h3>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Basic access for 1 month</p>
+                    </div>
+                    <div class="bg-slate-800 text-white font-extrabold text-lg px-4 py-2 rounded-xl group-hover:bg-indigo-600 transition">₹15</div>
+                </div>
+
+                <div onclick="initiatePayment(20, 'subscription', 65)" class="bg-slate-900 border border-slate-700 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-emerald-500 active:scale-95 transition group relative overflow-hidden">
+                    <div class="absolute -right-6 top-3 bg-emerald-500 text-white text-[8px] font-bold py-0.5 px-6 rotate-45 shadow-sm">BEST VALUE</div>
+                    <div>
+                        <h3 class="text-emerald-400 font-bold text-sm">65 Din Plan</h3>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Extended access for 2+ months</p>
+                    </div>
+                    <div class="bg-slate-800 text-white font-extrabold text-lg px-4 py-2 rounded-xl group-hover:bg-emerald-600 transition">₹20</div>
+                </div>
+
+                <div onclick="initiatePayment(30, 'subscription', 84)" class="bg-slate-900 border border-slate-700 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-amber-500 active:scale-95 transition group">
+                    <div>
+                        <h3 class="text-amber-400 font-bold text-sm">84 Din Plan</h3>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Premium access for almost 3 months</p>
+                    </div>
+                    <div class="bg-slate-800 text-white font-extrabold text-lg px-4 py-2 rounded-xl group-hover:bg-amber-600 transition">₹30</div>
+                </div>
+            </div>
+            
+            <button onclick="logoutProfile()" class="text-[10px] text-slate-500 font-semibold mt-10 hover:text-white transition w-full text-center"><i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Logout Account</button>
+        </div>
+
+        <!-- STAFF LIMIT REACHED MODAL -->
+        <div id="staffLimitModal" class="fixed inset-0 bg-slate-950/80 z-[250] flex items-center justify-center p-4 hidden backdrop-blur-md transition-all">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl">
+                <div class="bg-gradient-to-r from-rose-600 to-rose-800 p-4 text-center relative">
+                    <button onclick="closeModal('staffLimitModal')" class="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button>
+                    <h2 class="text-white font-bold text-lg">Staff Limit Reached</h2>
+                </div>
+                <div class="p-6 text-center bg-slate-50">
+                    <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500 text-2xl shadow-inner border border-rose-200">
+                        <i class="fa-solid fa-user-lock"></i>
+                    </div>
+                    <p class="text-xs text-slate-600 mb-4 leading-relaxed">Aap sirf apna pehla staff free mein add kar sakte hain.<br>Naya staff add karne ke liye <b>₹10</b> ka charge lagega.</p>
+                    <button onclick="payForStaff()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-sm shadow-md active:scale-95 transition-all shadow-emerald-500/30">Pay ₹10 & Add New Staff</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAYMENT QR MODAL -->
+        <div id="paymentModal" class="fixed inset-0 bg-slate-950/90 z-[260] flex flex-col items-center justify-center p-4 hidden backdrop-blur-md transition-all">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+                <div class="bg-indigo-600 p-4 text-center relative">
+                    <button onclick="closeModal('paymentModal')" class="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button>
+                    <h2 class="text-white font-bold text-lg">Payment Checkout</h2>
+                    <p class="text-indigo-200 text-[10px] mt-0.5">Amount: <b id="payAmountDisplay" class="text-white">₹0</b> for <b id="payDaysDisplay" class="text-white">...</b></p>
+                </div>
+                
+                <div class="p-5 flex flex-col items-center justify-center bg-slate-50">
+                    <a id="directUpiBtn" href="#" target="_top" class="w-full py-3.5 mb-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-sm shadow-md active:scale-95 transition-all text-center flex items-center justify-center gap-2 hover:shadow-lg">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" class="h-4 bg-white px-1.5 rounded-sm" alt="UPI">
+                        Pay via PhonePe / UPI
+                    </a>
+                    
+                    <div class="flex items-center gap-3 w-full mb-3">
+                        <hr class="flex-1 border-slate-200">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">OR SCAN QR</span>
+                        <hr class="flex-1 border-slate-200">
+                    </div>
+
+                    <img id="qrImageFallback" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3DQ269658254%40ybl%26pn%3DMr.%20Mahtab%20Alam" alt="Payment QR" class="w-36 h-36 object-contain rounded-xl shadow-sm border border-slate-200 p-1 bg-white">
+                    
+                    <p class="text-xs font-bold text-slate-800 mt-2">Pay to Mr. Mahtab Alam</p>
+                    <p class="text-[9px] text-slate-500">UPI ID: Q269658254@ybl</p>
+                    
+                    <div class="w-full mt-4 space-y-2 border-t border-slate-200 pt-4">
+                        <label class="text-[10px] font-semibold text-slate-600 block text-center">Payment successful? Enter 12-digit UTR/Ref No. below:</label>
+                        <input type="number" id="utrInput" placeholder="e.g. 320158493021" class="w-full text-xs p-3 rounded-xl border border-slate-300 focus:border-indigo-500 outline-none text-center font-bold tracking-widest text-slate-700 bg-white">
+                        <button onclick="verifyPayment()" class="w-full py-3 rounded-xl bg-emerald-500 text-white font-bold text-xs shadow-md active:scale-95 transition-all mt-2">Verify & Activate</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] px-3.5 py-2 rounded-full text-[10px] font-semibold text-white shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2 border border-white/20"></div>
+
+        <!-- MAIN DASHBOARD CONTENT -->
+        <header id="mainHeader" class="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 text-white p-3.5 sticky top-0 z-30 shadow-xl border-b border-indigo-500/20">
+            <div class="flex justify-between items-center gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div id="headerProfileIcon" onclick="openProfileModal()" class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-800 flex items-center justify-center border border-indigo-300/30 shadow-md shadow-indigo-600/30 flex-shrink-0 relative cursor-pointer active:scale-90 transition-transform">
+                        <i class="fa-solid fa-user-check text-amber-300 text-sm"></i>
+                        <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-950 pulse-dot"></span>
+                    </div>
+                    <div class="truncate">
+                        <h1 id="headerBusinessName" class="font-bold text-xs tracking-tight leading-tight text-white flex items-center gap-1.5">
+                            Staff Pro <span class="bg-amber-400/20 text-amber-300 text-[8px] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wider border border-amber-400/30">EXECUTIVE</span>
+                        </h1>
+                        <span id="headerOwnerName" class="text-[9px] text-indigo-300/80 block font-normal mt-0.5 truncate">Attendance & Duty Hours Engine</span>
+                    </div>
+                </div>
+                <button onclick="checkStaffLimitAndOpen()" class="bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-semibold shadow-md shadow-emerald-950/40 flex items-center gap-1 flex-shrink-0 active:scale-95 transition border border-emerald-400/30">
+                    <i class="fa-solid fa-plus text-[9px]"></i> Add Staff
+                </button>
+            </div>
+            <div id="expiryBanner" class="hidden mt-2.5 text-[9px] font-bold text-center py-1 rounded border shadow-sm"></div>
+        </header>
+
+        <main id="mainContent" class="flex-1 p-3 overflow-y-auto space-y-3 no-scrollbar pb-24">
+            <!-- Attendance Tab -->
+            <section id="tab-staff" class="space-y-3">
+                <div class="grid grid-cols-3 gap-2 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 p-3 rounded-2xl text-white shadow-lg border border-indigo-800/30 card-glow">
+                    <div class="bg-white/5 backdrop-blur-md p-2 rounded-xl border border-white/10 text-center flex flex-col justify-center">
+                        <p class="text-[8px] text-indigo-200 uppercase font-semibold tracking-wider opacity-80">Total Staff</p>
+                        <p id="stat-total-staff" class="text-sm font-bold text-white mt-0.5">0</p>
+                    </div>
+                    <div class="bg-emerald-500/15 backdrop-blur-md p-1.5 rounded-xl border border-emerald-400/20 text-center flex flex-col justify-center">
+                        <p class="text-[8px] text-emerald-300 uppercase font-semibold tracking-wider">Present</p>
+                        <p id="stat-present-today" class="text-sm font-bold text-emerald-400 mt-0.5">0</p>
+                    </div>
+                    <div class="bg-rose-500/15 backdrop-blur-md p-1.5 rounded-xl border border-rose-400/20 text-center flex flex-col justify-center">
+                        <p class="text-[8px] text-rose-300 uppercase font-semibold tracking-wider">Absent</p>
+                        <p id="stat-absent-today" class="text-sm font-bold text-rose-400 mt-0.5">0</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-1.5 rounded-xl border border-slate-200/90 shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-indigo-500 text-[10px] ml-2"></i>
+                    <input type="text" id="staffSearchInput" onkeyup="filterStaffList()" placeholder="Search staff by name or phone..." class="w-full text-[11px] font-normal bg-transparent border-none outline-none text-slate-800 placeholder-slate-400">
+                </div>
+
+                <div class="flex justify-between items-center bg-white border border-slate-200/90 rounded-xl p-1.5 shadow-sm">
+                    <button onclick="changeDate(-1)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center hover:bg-slate-200 active:scale-90 transition"><i class="fa-solid fa-chevron-left text-[10px]"></i></button>
+                    
+                    <button onclick="openCustomDatePicker('main')" class="flex items-center gap-1.5 px-3 py-1 bg-indigo-50/90 hover:bg-indigo-100/80 border border-indigo-100/80 rounded-lg transition active:scale-95 shadow-sm">
+                        <i class="fa-regular fa-calendar-days text-indigo-600 text-[10px]"></i>
+                        <span id="dateDisplayLabel" class="text-[11px] font-bold text-indigo-950">Sun, 02 Aug 2026</span>
+                        <i class="fa-solid fa-angle-down text-indigo-400 text-[9px]"></i>
+                    </button>
+
+                    <button onclick="changeDate(1)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center hover:bg-slate-200 active:scale-90 transition"><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                </div>
+
+                <input type="hidden" id="attendanceDate">
+                <div id="staffCardsContainer" class="space-y-2.5"></div>
+            </section>
+
+            <!-- History Tab -->
+            <section id="tab-register" class="hidden space-y-3">
+                <div class="bg-white p-2.5 rounded-2xl border border-slate-200/90 shadow-sm space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-semibold text-slate-700 flex items-center gap-1">
+                            <i class="fa-solid fa-user-tag text-indigo-600"></i> Select Staff:
+                        </span>
+                        <span id="selectedStaffBadge" class="text-[9px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-100">None</span>
+                    </div>
+                    <div id="staffPillsContainer" class="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5"></div>
+                </div>
+
+                <div class="flex justify-between items-center bg-gradient-to-r from-indigo-50/80 to-slate-50 p-2 rounded-xl border border-indigo-100/80 shadow-sm">
+                    <span class="text-[10px] font-bold text-indigo-950 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> History
+                    </span>
+                    <button onclick="openCustomMonthPicker('register')" class="flex items-center gap-1 px-2.5 py-1 bg-white border border-indigo-200/80 rounded-lg text-indigo-800 font-bold text-[10px] hover:bg-indigo-50 active:scale-95 transition shadow-sm">
+                        <i class="fa-regular fa-calendar-days text-indigo-500"></i>
+                        <span id="registerMonthLabel">August 2026</span>
+                        <i class="fa-solid fa-angle-down text-indigo-400 text-[9px]"></i>
+                    </button>
+                    <input type="hidden" id="registerMonth">
+                </div>
+
+                <div id="individualLogContainer" class="space-y-1.5"></div>
+            </section>
+
+            <!-- Payroll Tab -->
+            <section id="tab-salary" class="hidden space-y-3">
+                <div class="flex justify-between items-center bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-sm">
+                    <span class="text-[10px] font-semibold text-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-check text-indigo-600"></i> Payroll Month:
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="downloadSalaryPDF()" class="flex items-center gap-1 px-2.5 py-1 bg-rose-50 border border-rose-100 rounded-lg text-rose-600 font-bold text-[10px] hover:bg-rose-100 active:scale-95 transition shadow-sm">
+                            <i class="fa-solid fa-file-pdf"></i> PDF
+                        </button>
+                        <button onclick="openCustomMonthPicker('salary')" class="flex items-center gap-1 px-2.5 py-1 bg-indigo-50/80 border border-indigo-100 rounded-lg text-indigo-950 font-bold text-[10px] hover:bg-indigo-100 active:scale-95 transition shadow-sm">
+                            <i class="fa-regular fa-calendar text-indigo-600"></i>
+                            <span id="salaryMonthLabel">August 2026</span>
+                            <i class="fa-solid fa-angle-down text-indigo-400 text-[9px]"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" id="salaryMonth">
+                </div>
+
+                <div id="salarySummaryCard" class="bg-gradient-to-br from-emerald-800 via-teal-900 to-slate-950 text-white p-3.5 rounded-2xl shadow-xl space-y-2 relative overflow-hidden border border-emerald-500/30 emerald-glow">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl text-white">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[9px] text-emerald-200/80 font-semibold tracking-wider uppercase">Total Earned (Kul Bana)</p>
+                            <h3 id="totalSalaryAmount" class="text-xl font-extrabold tracking-tight mt-0.5 text-white">₹0</h3>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[8px] text-emerald-200/80 font-semibold uppercase tracking-wider block">Total Balance (Kul Baaki)</span>
+                            <span id="totalNetBalanceAmount" class="text-sm font-bold text-amber-300">₹0</span>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-emerald-500/20 grid grid-cols-2 gap-2 text-[9px]">
+                        <div class="bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-xl border border-white/10">
+                            <span class="text-emerald-200/80 block text-[8px] font-normal">Total Paid (Staff Ko)</span>
+                            <span id="totalAdvanceAmount" class="font-bold text-white text-[11px]">₹0</span>
+                            <span id="topPaidBreakdown" class="text-[7px] text-emerald-200/60 block leading-tight mt-0.5"></span>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-xl border border-white/10 flex flex-col justify-center">
+                            <span class="text-emerald-200/80 block text-[8px] font-normal">Total Staff</span>
+                            <span id="totalStaffCountSalary" class="font-bold text-white text-[11px]">0 Staff</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="salaryBreakdownContainer" class="space-y-2.5"></div>
+            </section>
+        </main>
+
+        <nav id="mainNav" class="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass-effect border-t border-slate-200/80 flex justify-around p-1.5 z-30 shadow-2xl sm:rounded-b-[2.5rem]">
+            <button onclick="switchTab('staff')" id="nav-staff" class="flex flex-col items-center text-indigo-600 transition active:scale-95">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-indigo-50 border border-indigo-100 shadow-sm"><i class="fa-solid fa-users text-xs"></i></div>
+                <span class="text-[8px] mt-0.5 font-bold">Attendance</span>
+            </button>
+            <button onclick="switchTab('register')" id="nav-register" class="flex flex-col items-center text-slate-400 transition active:scale-95">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center"><i class="fa-solid fa-calendar-days text-xs"></i></div>
+                <span class="text-[8px] mt-0.5 font-semibold">History</span>
+            </button>
+            <button onclick="switchTab('salary')" id="nav-salary" class="flex flex-col items-center text-slate-400 transition active:scale-95">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center"><i class="fa-solid fa-indian-rupee-sign text-xs"></i></div>
+                <span class="text-[8px] mt-0.5 font-semibold">Payroll</span>
+            </button>
+        </nav>
+
+        <!-- CENTERED CALENDAR -->
+        <div id="customDatePickerModal" class="fixed inset-0 bg-slate-950/80 z-[100] flex items-center justify-center p-3 hidden backdrop-blur-md transition-all">
+            <div class="bg-white w-full max-w-[250px] rounded-[1.25rem] overflow-hidden shadow-2xl border border-slate-200/50 animate-in fade-in zoom-in-95 duration-150">
+                <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 p-3 text-white space-y-0.5 relative">
+                    <span id="calYearHeader" class="text-[9px] text-indigo-200 font-bold uppercase tracking-widest block">2026</span>
+                    <h2 id="calDateHeader" class="text-base font-extrabold tracking-tight">Sun, Aug 2</h2>
+                    <button onclick="closeModal('customDatePickerModal')" class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center backdrop-blur-sm transition-all"><i class="fa-solid fa-xmark text-[10px]"></i></button>
+                </div>
+                <div class="px-2.5 py-1.5 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                    <button onclick="prevCalendarMonth()" class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-700 flex items-center justify-center shadow-sm hover:bg-indigo-50 hover:text-indigo-600 active:scale-90 transition-all"><i class="fa-solid fa-chevron-left text-[9px]"></i></button>
+                    <span id="calMonthYearTitle" class="text-[11px] font-bold text-slate-800 tracking-wide">August 2026</span>
+                    <button onclick="nextCalendarMonth()" class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-700 flex items-center justify-center shadow-sm hover:bg-indigo-50 hover:text-indigo-600 active:scale-90 transition-all"><i class="fa-solid fa-chevron-right text-[9px]"></i></button>
+                </div>
+                <div class="p-2 bg-white">
+                    <div class="grid grid-cols-7 text-center font-bold text-[8px] text-slate-400 uppercase tracking-wider mb-1.5">
+                        <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+                    </div>
+                    <div id="calendarDaysGrid" class="grid grid-cols-7 gap-y-1 gap-x-1 text-center text-[10px] font-semibold"></div>
+                </div>
+                <div class="p-2 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                    <button onclick="setCalendarToday()" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-[9px] border border-indigo-100 hover:bg-indigo-100 active:scale-95 transition-all">Today</button>
+                    <button onclick="closeModal('customDatePickerModal')" class="px-4 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-[9px] shadow-md shadow-indigo-600/30 active:scale-95 transition-all">Done</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="customMonthPickerModal" class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-3 hidden backdrop-blur-md transition-all">
+            <div class="bg-white w-full max-w-xs rounded-3xl overflow-hidden shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+                <div class="bg-gradient-to-r from-slate-900 to-indigo-950 p-3.5 text-white relative">
+                    <span class="text-[9px] text-indigo-300 font-semibold uppercase tracking-widest block">Select Month</span>
+                    <h2 id="monthPickerHeaderTitle" class="text-sm font-bold tracking-tight mt-0.5">August 2026</h2>
+                    <button onclick="closeModal('customMonthPickerModal')" class="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+                <div class="p-2.5 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                    <button onclick="changeMonthPickerYear(-1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-700 flex items-center justify-center shadow-sm active:scale-90 transition"><i class="fa-solid fa-chevron-left text-[9px]"></i></button>
+                    <span id="monthPickerYearTitle" class="text-xs font-bold text-indigo-950">2026</span>
+                    <button onclick="changeMonthPickerYear(1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-700 flex items-center justify-center shadow-sm active:scale-90 transition"><i class="fa-solid fa-chevron-right text-[9px]"></i></button>
+                </div>
+                <div class="p-2.5">
+                    <div id="monthPickerGrid" class="grid grid-cols-3 gap-1.5"></div>
+                </div>
+                <div class="p-2.5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                    <button onclick="setMonthPickerCurrentMonth()" class="px-2.5 py-1 rounded-xl bg-indigo-50 text-indigo-600 font-bold text-[9px] border border-indigo-100 hover:bg-indigo-100 active:scale-95 transition">This Month</button>
+                    <button onclick="closeModal('customMonthPickerModal')" class="px-3 py-1 rounded-xl bg-indigo-600 text-white font-bold text-[9px] shadow-md shadow-indigo-600/30 active:scale-95 transition">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="addAdvanceModal" class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-3 hidden backdrop-blur-md transition-all">
+            <div class="bg-white w-full max-w-xs rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150 relative">
+                <div class="bg-gradient-to-r from-slate-900 to-indigo-950 p-3.5 text-white relative">
+                    <span class="text-[9px] text-indigo-300 font-semibold uppercase tracking-widest block">Payment</span>
+                    <h2 class="text-sm font-bold tracking-tight mt-0.5">Record Advance Payment</h2>
+                    <button onclick="closeModal('addAdvanceModal')" class="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+                <div class="p-4 space-y-3">
+                    <input type="hidden" id="advanceStaffId">
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-700 block mb-1">Amount (₹)</label>
+                        <input type="number" id="advanceAmount" placeholder="Enter amount..." class="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-700 block mb-1">Date</label>
+                        <button type="button" onclick="openCustomDatePicker('advance')" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 text-left bg-slate-50 text-slate-700 flex justify-between items-center hover:border-indigo-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all shadow-sm active:scale-95">
+                            <span id="advanceDateLabel" class="font-semibold text-sm">Select Date</span>
+                            <div class="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center pointer-events-none">
+                                <i class="fa-regular fa-calendar-days text-indigo-600"></i>
+                            </div>
+                        </button>
+                        <input type="hidden" id="advanceDate">
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-700 block mb-1">Paisa Kisko Diya?</label>
+                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 mb-2">
+                            <label class="flex-1 text-center">
+                                <input type="radio" name="paymentType" value="staff" class="peer hidden" checked onchange="toggleReceiverInput()">
+                                <div class="text-[10px] font-bold py-1.5 rounded-lg peer-checked:bg-white peer-checked:text-indigo-600 peer-checked:shadow-sm text-slate-500 cursor-pointer transition-all"><i class="fa-solid fa-user text-[9px] mr-1"></i> Staff Ko</div>
+                            </label>
+                            <label class="flex-1 text-center">
+                                <input type="radio" name="paymentType" value="home" class="peer hidden" onchange="toggleReceiverInput()">
+                                <div class="text-[10px] font-bold py-1.5 rounded-lg peer-checked:bg-white peer-checked:text-indigo-600 peer-checked:shadow-sm text-slate-500 cursor-pointer transition-all"><i class="fa-solid fa-house text-[9px] mr-1"></i> Ghar Bheja</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="receiverNameContainer" class="hidden">
+                        <label class="text-[10px] font-semibold text-slate-700 block mb-1">Kisko Bheja? (Naam)</label>
+                        <input type="text" id="receiverName" placeholder="E.g., Mummy, Bhai..." class="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition bg-slate-50 placeholder-slate-400">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-700 block mb-1">Note (Optional)</label>
+                        <input type="text" id="advanceNote" placeholder="E.g., September advance..." class="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition bg-slate-50 placeholder-slate-400">
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+                    <button onclick="closeModal('addAdvanceModal')" class="px-3.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 font-bold text-[10px] active:scale-95 transition shadow-sm">Cancel</button>
+                    <button onclick="saveAdvance()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-[10px] shadow-md shadow-indigo-600/30 active:scale-95 transition">Save Payment</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="addStaffModal" class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-3 hidden backdrop-blur-md transition-all">
+            <div class="bg-white w-full max-w-xs rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-3.5 text-white relative">
+                    <span class="text-[9px] text-emerald-200 font-semibold uppercase tracking-widest block">New Member</span>
+                    <h2 class="text-sm font-bold tracking-tight mt-0.5">Add Staff Profile</h2>
+                    <button onclick="closeModal('addStaffModal')" class="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+                <div class="p-4 space-y-3">
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-700 block mb-1">Full Name</label>
+                        <input type="text" id="newStaffName" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-700 block mb-1">Phone Number</label>
+                        <input type="tel" id="newStaffPhone" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-700 block mb-1">Salary Type</label>
+                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <label class="flex-1 text-center">
+                                <input type="radio" name="newStaffSalaryType" value="monthly" class="peer hidden" checked>
+                                <div class="text-[10px] font-bold py-1.5 rounded-lg peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm text-slate-500 cursor-pointer transition-all">Monthly</div>
+                            </label>
+                            <label class="flex-1 text-center">
+                                <input type="radio" name="newStaffSalaryType" value="daily" class="peer hidden">
+                                <div class="text-[10px] font-bold py-1.5 rounded-lg peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm text-slate-500 cursor-pointer transition-all">Daily Wage</div>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-700 block mb-1">Salary Amount (₹)</label>
+                        <input type="number" id="newStaffSalary" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition bg-slate-50">
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+                    <button onclick="closeModal('addStaffModal')" class="px-3.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 font-bold text-[10px] active:scale-95 transition shadow-sm">Cancel</button>
+                    <button onclick="saveNewStaff()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-[10px] shadow-md shadow-emerald-600/30 active:scale-95 transition">Add Staff</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="confirmDeleteModal" class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-3 hidden backdrop-blur-md transition-all">
+            <div class="bg-white w-full max-w-xs rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+                <div class="bg-gradient-to-r from-rose-600 to-rose-700 p-4 text-white relative flex flex-col items-center justify-center pt-6">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 shadow-inner">
+                        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                    </div>
+                    <h2 class="text-sm font-bold tracking-tight text-center">Delete Staff?</h2>
+                </div>
+                <div class="p-5 text-center">
+                    <p class="text-[11px] text-slate-600 font-medium leading-relaxed">Kya aap sach mein is staff member ko delete karna chahte hain?</p>
+                    <input type="hidden" id="staffToDeleteId">
+                </div>
+                <div class="p-3 bg-slate-50 border-t border-slate-100 flex justify-center gap-2">
+                    <button onclick="closeModal('confirmDeleteModal')" class="flex-1 py-2 rounded-xl bg-slate-200 text-slate-700 font-bold text-[10px] active:scale-95 transition shadow-sm">Cancel</button>
+                    <button onclick="executeDeleteStaff()" class="flex-1 py-2 rounded-xl bg-rose-600 text-white font-bold text-[10px] shadow-md shadow-rose-600/30 active:scale-95 transition">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE DETAILS MODAL -->
+        <div id="profileModal" class="fixed inset-0 bg-slate-950/80 z-[150] flex items-center justify-center p-3 hidden backdrop-blur-md transition-all">
+            <div class="bg-white w-full max-w-xs rounded-[2rem] overflow-hidden shadow-2xl border border-slate-200/50 animate-in fade-in zoom-in-95 duration-150">
+                <div class="bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 p-6 text-white relative text-center">
+                    <button onclick="closeModal('profileModal')" class="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all"><i class="fa-solid fa-xmark text-[10px]"></i></button>
+                    
+                    <div id="modalProfileInitials" class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-2xl font-extrabold mx-auto mb-3 border border-white/20 shadow-inner backdrop-blur-md">PR</div>
+                    
+                    <h2 id="modalProfileName" class="text-lg font-bold tracking-tight">Admin Name</h2>
+                    <span class="bg-amber-400/20 text-amber-300 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-amber-400/30 mt-1.5 inline-block">EXECUTIVE</span>
+                </div>
+                
+                <div class="p-4 space-y-3 bg-slate-50">
+                    <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <span class="text-[9px] font-bold text-slate-400 block mb-1 uppercase tracking-wider">Registered Account Email</span>
+                        <div class="flex items-center gap-2.5 text-slate-700 font-semibold text-xs">
+                            <div class="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500">
+                                <i class="fa-solid fa-envelope text-[10px]"></i>
+                            </div>
+                            <span id="modalProfileEmail" class="truncate">user@email.com</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm mt-2">
+                        <span class="text-[9px] font-bold text-slate-400 block mb-1 uppercase tracking-wider">Max Staff Limit</span>
+                        <div class="flex items-center justify-between text-slate-700 font-semibold text-xs">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
+                                    <i class="fa-solid fa-users text-[10px]"></i>
+                                </div>
+                                <span>Total Slots</span>
+                            </div>
+                            <span id="modalProfileStaffLimit" class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">1</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-3 bg-white border-t border-slate-100 flex justify-center">
+                    <button onclick="logoutProfile()" class="w-full py-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-[11px] border border-rose-100 hover:bg-rose-100 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out / Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT WITH STANDALONE / LOCALSTORAGE BACKUP -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Safe Firebase Configuration Initialization
+        let firebaseConfig = {
+            apiKey: "AIzaSyDemoApiKeyForStandaloneApp12345",
+            authDomain: "staff-payroll-app.firebaseapp.com",
+            projectId: "staff-payroll-app",
+            storageBucket: "staff-payroll-app.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456789"
+        };
+
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                firebaseConfig = JSON.parse(__firebase_config);
+            }
+        } catch(e) {
+            console.log("Using default config setup");
+        }
+
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch(e) {
+            console.warn("Firebase fallback mode active", e);
+        }
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-staff-app';
+        let currentUserId = 'local_user';
+
+        // Shared Application State
+        window.state = {
+            currentDate: new Date(),
+            registerSelectedMonth: new Date(),
+            salarySelectedMonth: new Date(),
+            selectedStaffId: null,
+            staff: [],
+            attendance: {},
+            advances: [],
+            profile: null,
+            planExpiryDate: null, 
+            createdAt: null
+        };
+
+        let tempCalDate = new Date(window.state.currentDate);
+        let activeMonthPickerTarget = null;
+        let tempMonthPickerDate = new Date();
+        let activeDatePickerTarget = 'main'; 
+        
+        let paymentContext = 'subscription'; 
+        let selectedPaymentValue = 0;
+        let selectedPaymentAmount = 0;
+
+        // Initialize Local Storage Backup
+        function loadFromLocalStorage() {
+            try {
+                const data = localStorage.getItem('staff_pro_state');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    window.state.staff = parsed.staff || [];
+                    window.state.attendance = parsed.attendance || {};
+                    window.state.advances = parsed.advances || [];
+                    window.state.profile = parsed.profile || null;
+                    window.state.planExpiryDate = parsed.planExpiryDate || null;
+                    window.state.createdAt = parsed.createdAt || null;
+                }
+            } catch(e) {
+                console.error("Local storage error:", e);
+            }
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('staff_pro_state', JSON.stringify({
+                    staff: window.state.staff,
+                    attendance: window.state.attendance,
+                    advances: window.state.advances,
+                    profile: window.state.profile,
+                    planExpiryDate: window.state.planExpiryDate,
+                    createdAt: window.state.createdAt
+                }));
+            } catch(e) {
+                console.error("Local save error:", e);
+            }
+        }
+
+        const initAuth = async () => {
+            loadFromLocalStorage();
+            if (auth) {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (e) {
+                    console.log("Auth silent step", e);
+                }
+            }
+            initApp();
+        };
+
+        initAuth();
+
+        if (auth) {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUserId = user.uid;
+                    await checkCurrentSession();
+                    initApp();
+                }
+            });
+        }
+
+        async function checkCurrentSession() {
+            if (!db) return;
+            try {
+                const sessionRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'appState', 'currentSession');
+                const sessionSnap = await getDoc(sessionRef);
+                if (sessionSnap.exists() && sessionSnap.data().activeEmail) {
+                    await loadDataForEmail(sessionSnap.data().activeEmail);
+                }
+            } catch (e) {
+                console.log("Session fallback");
+            }
+        }
+
+        async function loadDataForEmail(email) {
+            if (!db) return false;
+            try {
+                const emailKey = email.toLowerCase();
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'appState', emailKey);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    window.state.staff = data.staff || [];
+                    window.state.attendance = data.attendance || {};
+                    window.state.advances = data.advances || [];
+                    window.state.profile = data.profile || null;
+                    window.state.planExpiryDate = data.planExpiryDate || null;
+                    window.state.createdAt = data.createdAt || null;
+                    if(window.state.profile && !window.state.profile.staffLimit) {
+                        window.state.profile.staffLimit = 1;
+                    }
+                    saveToLocalStorage();
+                    return true;
+                }
+            } catch(e) {
+                console.log("Cloud load error, using local data");
+            }
+            return false;
+        }
+
+        async function setSession(email) {
+            if (!db) return;
+            try {
+                const sessionRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'appState', 'currentSession');
+                await setDoc(sessionRef, { activeEmail: email ? email.toLowerCase() : null });
+            } catch(e) {}
+        }
+
+        async function saveToCloud() {
+            saveToLocalStorage();
+            if (!db || !currentUserId || !window.state.profile) return;
+            try {
+                const emailKey = window.state.profile.email.toLowerCase();
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'appState', emailKey);
+                await setDoc(docRef, {
+                    staff: window.state.staff,
+                    attendance: window.state.attendance,
+                    advances: window.state.advances,
+                    profile: window.state.profile,
+                    planExpiryDate: window.state.planExpiryDate,
+                    createdAt: window.state.createdAt
+                });
+            } catch (e) {
+                console.log("Cloud sync error, saved locally");
+            }
+        }
+
+        function getTotalGlobalPresents() {
+            let total = 0;
+            for (const date in window.state.attendance) {
+                for (const staffId in window.state.attendance[date]) {
+                    if (window.state.attendance[date][staffId] === 'present') {
+                        total++;
+                    }
+                }
+            }
+            return total;
+        }
+
+        async function getInternetTime() {
+            return new Date().getTime(); 
+        }
+
+        async function checkSubscriptionStatus() {
+            if (!window.state.profile) return true; 
+            
+            const now = await getInternetTime();
+            let isExpired = false;
+            let expiryReasonText = "";
+
+            if (window.state.planExpiryDate) {
+                const expiry = new Date(window.state.planExpiryDate).getTime();
+                if (now > expiry) {
+                    isExpired = true;
+                    expiryReasonText = "Aapka recharge plan expire ho chuka hai. App ko aage use karne ke liye naya plan select karein.";
+                }
+            } else {
+                const totalPresents = getTotalGlobalPresents();
+                if (totalPresents >= 4) {
+                    isExpired = true;
+                    expiryReasonText = "Aapka free trial (3 presents limit) khatam ho gaya hai. App ko chalane ke liye recharge karein.";
+                }
+            }
+
+            if(isExpired && expiryReasonText) {
+                document.getElementById('expiryReasonText').textContent = expiryReasonText;
+            }
+
+            return !isExpired;
+        }
+
+        window.checkStaffLimitAndOpen = function() {
+            const limit = (window.state.profile && window.state.profile.staffLimit) ? window.state.profile.staffLimit : 1;
+            
+            if (window.state.staff.length < limit) {
+                openModal('addStaffModal');
+            } else {
+                openModal('staffLimitModal');
+            }
+        };
+        
+        window.payForStaff = function() {
+            initiatePayment(10, 'add_staff', 1);
+        };
+
+        window.initiatePayment = function(amount, context, value) {
+            selectedPaymentAmount = amount;
+            paymentContext = context;
+            selectedPaymentValue = value;
+            
+            document.getElementById('payAmountDisplay').textContent = `₹${amount}`;
+            
+            if (context === 'subscription') {
+                document.getElementById('payDaysDisplay').textContent = `${value} Days`;
+            } else {
+                document.getElementById('payDaysDisplay').textContent = `1 New Staff Slot`;
+            }
+            
+            document.getElementById('utrInput').value = '';
+            
+            const upiId = "Q269658254@ybl";
+            const payeeName = "Mr. Mahtab Alam";
+            const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR`;
+            
+            document.getElementById('directUpiBtn').href = upiLink;
+            document.getElementById('qrImageFallback').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
+            
+            closeModal('staffLimitModal');
+            document.getElementById('paymentModal').classList.remove('hidden');
+        };
+
+        window.verifyPayment = async function() {
+            const utr = document.getElementById('utrInput').value.trim();
+            if(utr.length < 10) {
+                showToast("Please enter a valid 12-digit UTR number", "error");
+                return;
+            }
+
+            showToast("Verifying payment...", "success");
+            
+            setTimeout(async () => {
+                if (paymentContext === 'subscription') {
+                    const now = new Date();
+                    let newExpiry;
+                    if (window.state.planExpiryDate && new Date(window.state.planExpiryDate) > now) {
+                        newExpiry = new Date(window.state.planExpiryDate);
+                    } else {
+                        newExpiry = new Date();
+                    }
+                    newExpiry.setDate(newExpiry.getDate() + selectedPaymentValue);
+                    window.state.planExpiryDate = newExpiry.toISOString();
+                } else if (paymentContext === 'add_staff') {
+                    if(!window.state.profile.staffLimit) window.state.profile.staffLimit = 1;
+                    window.state.profile.staffLimit += selectedPaymentValue;
+                }
+                
+                try {
+                    await saveToCloud();
+                    closeModal('paymentModal');
+                    
+                    if (paymentContext === 'subscription') {
+                        document.getElementById('subscriptionScreen').classList.add('hidden');
+                        document.getElementById('mainHeader').classList.remove('hidden');
+                        document.getElementById('mainContent').classList.remove('hidden');
+                        document.getElementById('mainNav').classList.remove('hidden');
+                        
+                        showToast(`Recharge Successful! Valid for ${selectedPaymentValue} days.`, "success");
+                        initApp();
+                    } else {
+                        showToast(`Payment Successful! Naya Staff add kar sakte hain.`, "success");
+                        openModal('addStaffModal');
+                    }
+                } catch(e) {
+                    showToast("Error saving data. Please try again.", "error");
+                }
+            }, 1200);
+        };
+
+        async function initApp() {
+            if (!window.state.profile) {
+                document.getElementById('onboardingScreen').classList.remove('hidden');
+                document.getElementById('subscriptionScreen').classList.add('hidden');
+                hideMainDashboard();
+                setAuthMode('login'); 
+            } else {
+                document.getElementById('onboardingScreen').classList.add('hidden');
+                loadProfileData();
+                
+                const hasAccess = await checkSubscriptionStatus(); 
+                
+                if(hasAccess) {
+                    document.getElementById('subscriptionScreen').classList.add('hidden');
+                    showMainDashboard();
+                } else {
+                    document.getElementById('subscriptionScreen').classList.remove('hidden');
+                    hideMainDashboard();
+                }
+            }
+
+            updateDateDisplay();
+            renderAttendanceTab();
+            updateDashboardStats();
+            const todayStr = window.state.currentDate.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            document.getElementById('advanceDateLabel').textContent = todayStr;
+            document.getElementById('advanceDate').value = formatDateForInput(window.state.currentDate);
+        }
+
+        function hideMainDashboard() {
+            document.getElementById('mainHeader').classList.add('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('mainNav').classList.add('hidden');
+        }
+
+        function showMainDashboard() {
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('mainNav').classList.remove('hidden');
+        }
+
+        let authMode = 'login';
+
+        function setAuthMode(mode) {
+            authMode = mode;
+            const nameField = document.getElementById('nameField');
+            const confirmPassField = document.getElementById('confirmPassField');
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const tabLogin = document.getElementById('tabLogin');
+            const tabSignup = document.getElementById('tabSignup');
+            
+            document.getElementById('profileName').value = '';
+            document.getElementById('profileEmail').value = '';
+            document.getElementById('profilePassword').value = '';
+            document.getElementById('profileConfirmPassword').value = '';
+
+            if(mode === 'login') {
+                nameField.classList.add('hidden');
+                confirmPassField.classList.add('hidden');
+                submitBtn.innerHTML = 'Login Securely <i class="fa-solid fa-arrow-right ml-1"></i>';
+                
+                tabLogin.classList.replace('text-slate-500', 'text-indigo-400');
+                tabLogin.classList.replace('border-transparent', 'border-indigo-500');
+                tabSignup.classList.replace('text-indigo-400', 'text-slate-500');
+                tabSignup.classList.replace('border-indigo-500', 'border-transparent');
+                
+                document.getElementById('authTitle').textContent = 'Welcome Back';
+                document.getElementById('authSub').textContent = 'Login to your dashboard';
+            } else {
+                nameField.classList.remove('hidden');
+                confirmPassField.classList.remove('hidden');
+                submitBtn.innerHTML = 'Create Account <i class="fa-solid fa-arrow-right ml-1"></i>';
+                
+                tabSignup.classList.replace('text-slate-500', 'text-indigo-400');
+                tabSignup.classList.replace('border-transparent', 'border-indigo-500');
+                tabLogin.classList.replace('text-indigo-400', 'text-slate-500');
+                tabLogin.classList.replace('border-indigo-500', 'border-transparent');
+                
+                document.getElementById('authTitle').textContent = 'Staff Pro Setup';
+                document.getElementById('authSub').textContent = 'Create your executive dashboard';
+            }
+        }
+
+        async function handleAuthSubmit() {
+            const email = document.getElementById('profileEmail').value.trim();
+            const password = document.getElementById('profilePassword').value;
+
+            if(!email || !password) {
+                showToast("Email aur Password daalna zaroori hai", "error");
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!emailRegex.test(email)) {
+                showToast("Sahi Email ID daaliye", "error");
+                return;
+            }
+
+            const loader = document.getElementById('cloudLoadingOverlay');
+            loader.classList.remove('hidden');
+
+            try {
+                if (authMode === 'signup') {
+                    const name = document.getElementById('profileName').value.trim();
+                    const confirmPassword = document.getElementById('profileConfirmPassword').value;
+
+                    if(!name || !confirmPassword) {
+                        showToast("Kripya sabhi details bharein", "error");
+                        loader.classList.add('hidden');
+                        return;
+                    }
+                    if(password !== confirmPassword) {
+                        showToast("Passwords match nahi kar rahe!", "error");
+                        loader.classList.add('hidden');
+                        return;
+                    }
+
+                    window.state.profile = { name, email, password, staffLimit: 1 };
+                    window.state.staff = window.state.staff || [];
+                    window.state.attendance = window.state.attendance || {};
+                    window.state.advances = window.state.advances || [];
+                    window.state.createdAt = new Date().toISOString();
+                    window.state.planExpiryDate = null;
+                    
+                    await saveToCloud();
+                    await setSession(email);
+
+                } else if (authMode === 'login') {
+                    if (!window.state.profile) {
+                        window.state.profile = { name: email.split('@')[0], email, password, staffLimit: 1 };
+                    } else {
+                        window.state.profile.email = email;
+                    }
+                    await setSession(email);
+                }
+
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    document.getElementById('onboardingScreen').classList.add('hidden');
+                    loadProfileData();
+                    initApp(); 
+                    showToast(authMode === 'login' ? "Login Successful!" : "Account Created!", "success");
+                }, 800);
+
+            } catch (e) {
+                console.error(e);
+                loader.classList.add('hidden');
+                showToast("Login error", "error");
+            }
+        }
+
+        function loadProfileData() {
+            if(window.state.profile) {
+                document.getElementById('headerBusinessName').innerHTML = `Staff Pro <span class="bg-amber-400/20 text-amber-300 text-[8px] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wider border border-amber-400/30">EXECUTIVE</span>`;
+                document.getElementById('headerOwnerName').textContent = window.state.profile.name || "Owner";
+                
+                const initials = (window.state.profile.name || "A").split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                document.getElementById('headerProfileIcon').innerHTML = `<span class="text-white font-bold text-sm">${initials}</span><span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-950 pulse-dot"></span>`;
+            }
+        }
+
+        function openProfileModal() {
+            if (window.state.profile) {
+                const name = window.state.profile.name || "Owner";
+                const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                
+                document.getElementById('modalProfileInitials').textContent = initials;
+                document.getElementById('modalProfileName').textContent = name;
+                document.getElementById('modalProfileEmail').textContent = window.state.profile.email;
+                document.getElementById('modalProfileStaffLimit').textContent = window.state.profile.staffLimit || 1;
+                
+                openModal('profileModal');
+            } else {
+                showToast("Profile data nahi mila!", "error");
+            }
+        }
+
+        async function logoutProfile() {
+            try {
+                const loader = document.getElementById('cloudLoadingOverlay');
+                loader.classList.remove('hidden');
+                
+                await setSession(null);
+                
+                window.state.profile = null;
+                saveToLocalStorage();
+                
+                setTimeout(() => {
+                    closeModal('profileModal');
+                    setAuthMode('login'); 
+                    document.getElementById('onboardingScreen').classList.remove('hidden');
+                    document.getElementById('subscriptionScreen').classList.add('hidden');
+                    hideMainDashboard();
+                    
+                    loader.classList.add('hidden');
+                    showToast("Aap logged out ho chuke hain", "success");
+                }, 600);
+                
+            } catch(e) {
+                showToast("Logout in process", "success");
+                document.getElementById('cloudLoadingOverlay').classList.add('hidden');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = type === 'success' ? `<i class="fa-solid fa-circle-check"></i> ${message}` : `<i class="fa-solid fa-circle-exclamation"></i> ${message}`;
+            toast.className = `fixed top-4 left-1/2 -translate-x-1/2 z-[9999] px-3.5 py-2 rounded-full text-[10px] font-semibold text-white shadow-2xl transition-all duration-300 flex items-center gap-2 border border-white/20 ${type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'}`;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function formatCurrency(amt) { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amt); }
+
+        function switchTab(tabId) {
+            ['staff', 'register', 'salary'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${t}`);
+                navBtn.classList.remove('text-indigo-600');
+                navBtn.classList.add('text-slate-400');
+                navBtn.querySelector('div').classList.remove('bg-indigo-50', 'border', 'border-indigo-100', 'shadow-sm');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            activeNav.classList.remove('text-slate-400');
+            activeNav.classList.add('text-indigo-600');
+            activeNav.querySelector('div').classList.add('bg-indigo-50', 'border', 'border-indigo-100', 'shadow-sm');
+
+            if (tabId === 'staff') renderAttendanceTab();
+            if (tabId === 'register') { renderStaffPills(); updateRegisterMonthDisplay(); renderIndividualRegister(); }
+            if (tabId === 'salary') { updateSalaryMonthDisplay(); renderSalaryTab(); }
+        }
+
+        function updateDateDisplay() {
+            document.getElementById('dateDisplayLabel').textContent = window.state.currentDate.toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            document.getElementById('attendanceDate').value = formatDateForInput(window.state.currentDate);
+        }
+
+        function changeDate(offset) {
+            window.state.currentDate.setDate(window.state.currentDate.getDate() + offset);
+            updateDateDisplay();
+            renderAttendanceTab();
+            updateDashboardStats();
+        }
+
+        function formatDateForInput(date) {
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            return (new Date(date - tzoffset)).toISOString().split('T')[0];
+        }
+
+        function openCustomDatePicker(target) {
+            activeDatePickerTarget = target;
+            if (target === 'main') {
+                tempCalDate = new Date(window.state.currentDate);
+            } else if (target === 'advance') {
+                const advVal = document.getElementById('advanceDate').value;
+                tempCalDate = advVal ? new Date(advVal) : new Date(window.state.currentDate);
+            }
+            
+            renderCalendar();
+            document.getElementById('customDatePickerModal').classList.remove('hidden');
+        }
+
+        function renderCalendar() {
+            document.getElementById('calYearHeader').textContent = tempCalDate.getFullYear();
+            document.getElementById('calDateHeader').textContent = tempCalDate.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' });
+            document.getElementById('calMonthYearTitle').textContent = tempCalDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+            
+            const grid = document.getElementById('calendarDaysGrid');
+            grid.innerHTML = '';
+            const year = tempCalDate.getFullYear();
+            const month = tempCalDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+            
+            for (let i = 0; i < startOffset; i++) grid.innerHTML += `<div></div>`;
+            
+            let compareDate = activeDatePickerTarget === 'main' ? window.state.currentDate : new Date(document.getElementById('advanceDate').value || window.state.currentDate);
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const isSelected = i === compareDate.getDate() && month === compareDate.getMonth() && year === compareDate.getFullYear();
+                
+                const btnClass = isSelected 
+                    ? "w-6 h-6 mx-auto rounded-full bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/40 flex items-center justify-center active:scale-90 transition-all" 
+                    : "w-6 h-6 mx-auto rounded-full text-slate-700 font-medium hover:bg-indigo-50 hover:text-indigo-600 flex items-center justify-center active:scale-90 transition-all";
+                grid.innerHTML += `<button onclick="selectCalendarDate(${i})" class="${btnClass}">${i}</button>`;
+            }
+        }
+
+        function selectCalendarDate(day) {
+            tempCalDate.setDate(day);
+            if (activeDatePickerTarget === 'main') {
+                window.state.currentDate = new Date(tempCalDate);
+                updateDateDisplay();
+                renderAttendanceTab();
+                updateDashboardStats();
+            } else if (activeDatePickerTarget === 'advance') {
+                document.getElementById('advanceDate').value = formatDateForInput(tempCalDate);
+                document.getElementById('advanceDateLabel').textContent = tempCalDate.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            }
+            renderCalendar();
+            setTimeout(() => { closeModal('customDatePickerModal'); }, 150);
+        }
+
+        function prevCalendarMonth() { tempCalDate.setMonth(tempCalDate.getMonth() - 1); renderCalendar(); }
+        function nextCalendarMonth() { tempCalDate.setMonth(tempCalDate.getMonth() + 1); renderCalendar(); }
+        
+        function setCalendarToday() {
+            const today = new Date(); 
+            if (activeDatePickerTarget === 'main') {
+                window.state.currentDate = new Date(today);
+                updateDateDisplay(); renderAttendanceTab(); updateDashboardStats();
+            } else if (activeDatePickerTarget === 'advance') {
+                document.getElementById('advanceDate').value = formatDateForInput(today);
+                document.getElementById('advanceDateLabel').textContent = today.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            }
+            closeModal('customDatePickerModal');
+        }
+
+        function openCustomMonthPicker(target) {
+            activeMonthPickerTarget = target;
+            tempMonthPickerDate = target === 'register' ? new Date(window.state.registerSelectedMonth) : new Date(window.state.salarySelectedMonth);
+            renderMonthPicker();
+            openModal('customMonthPickerModal');
+        }
+
+        function renderMonthPicker() {
+            document.getElementById('monthPickerHeaderTitle').textContent = tempMonthPickerDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+            document.getElementById('monthPickerYearTitle').textContent = tempMonthPickerDate.getFullYear();
+            const grid = document.getElementById('monthPickerGrid');
+            grid.innerHTML = '';
+            ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].forEach((m, idx) => {
+                const isSelected = idx === tempMonthPickerDate.getMonth();
+                const cls = isSelected 
+                    ? "py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md shadow-indigo-600/30 active:scale-95 transition"
+                    : "py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-indigo-50 active:scale-95 transition";
+                grid.innerHTML += `<button onclick="selectMonthPickerMonth(${idx})" class="${cls}">${m}</button>`;
+            });
+        }
+
+        function selectMonthPickerMonth(monthIdx) {
+            tempMonthPickerDate.setMonth(monthIdx);
+            if (activeMonthPickerTarget === 'register') {
+                window.state.registerSelectedMonth = new Date(tempMonthPickerDate);
+                updateRegisterMonthDisplay(); renderIndividualRegister();
+            } else {
+                window.state.salarySelectedMonth = new Date(tempMonthPickerDate);
+                updateSalaryMonthDisplay(); renderSalaryTab();
+            }
+            closeModal('customMonthPickerModal');
+        }
+
+        function changeMonthPickerYear(offset) { tempMonthPickerDate.setFullYear(tempMonthPickerDate.getFullYear() + offset); renderMonthPicker(); }
+        function setMonthPickerCurrentMonth() {
+            const today = new Date();
+            if (activeMonthPickerTarget === 'register') {
+                window.state.registerSelectedMonth = new Date(today); updateRegisterMonthDisplay(); renderIndividualRegister();
+            } else {
+                window.state.salarySelectedMonth = new Date(today); updateSalaryMonthDisplay(); renderSalaryTab();
+            }
+            closeModal('customMonthPickerModal');
+        }
+
+        function updateRegisterMonthDisplay() { document.getElementById('registerMonthLabel').textContent = window.state.registerSelectedMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); }
+        function updateSalaryMonthDisplay() { document.getElementById('salaryMonthLabel').textContent = window.state.salarySelectedMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); }
+
+        function renderAttendanceTab(filterTxt = '') {
+            const container = document.getElementById('staffCardsContainer');
+            container.innerHTML = '';
+            const dateStr = formatDateForInput(window.state.currentDate);
+            
+            const year = window.state.currentDate.getFullYear();
+            const month = window.state.currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+            
+            let displayStaff = window.state.staff;
+            if (filterTxt) displayStaff = window.state.staff.filter(s => s.name.toLowerCase().includes(filterTxt.toLowerCase()) || s.phone.includes(filterTxt.toLowerCase()));
+
+            if (displayStaff.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs"><i class="fa-solid fa-users-slash text-2xl mb-2 opacity-50 block"></i>No staff found. Click "Add Staff" above.</div>`; return;
+            }
+
+            displayStaff.forEach(staff => {
+                const status = window.state.attendance[dateStr]?.[staff.id] || null;
+                const isPresent = status === 'present';
+                const isAbsent = status === 'absent';
+                
+                let monthPresent = 0;
+                let monthAbsent = 0;
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const dStr = `${monthPrefix}-${String(i).padStart(2, '0')}`;
+                    if (window.state.attendance[dStr]?.[staff.id] === 'present') monthPresent++;
+                    if (window.state.attendance[dStr]?.[staff.id] === 'absent') monthAbsent++;
+                }
+                
+                const card = document.createElement('div');
+                card.className = "bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between";
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200 shrink-0">
+                            ${staff.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-xs">${staff.name}</h3>
+                            <p class="text-[9px] text-slate-500 font-medium"><i class="fa-solid fa-phone text-[8px] mr-0.5"></i> ${staff.phone}</p>
+                            
+                            <div class="flex items-center gap-1.5 mt-1.5 mb-0.5">
+                                <span class="text-[8px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded shadow-sm border border-emerald-100 font-bold" title="Total Present This Month">
+                                    <i class="fa-solid fa-check text-[7px]"></i> P: ${monthPresent}
+                                </span>
+                                <span class="text-[8px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded shadow-sm border border-rose-100 font-bold" title="Total Absent This Month">
+                                    <i class="fa-solid fa-xmark text-[7px]"></i> A: ${monthAbsent}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center mt-1.5 gap-2">
+                                <button onclick="prepAdvanceModal('${staff.id}')" class="text-[9px] text-indigo-600 font-semibold hover:underline"><i class="fa-solid fa-indian-rupee-sign"></i> Add Advance</button>
+                                <button onclick="deleteStaff('${staff.id}')" class="text-[9px] text-rose-500 font-semibold hover:underline"><i class="fa-solid fa-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1.5 shrink-0">
+                        <button onclick="markAttendance('${staff.id}', 'present')" class="w-20 py-1.5 rounded-lg text-[9px] font-bold transition-all border ${isPresent ? 'bg-emerald-500 text-white border-emerald-600 shadow-md shadow-emerald-500/30' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-emerald-50'}">
+                            <i class="fa-solid fa-check mr-1"></i> Present
+                        </button>
+                        <button onclick="markAttendance('${staff.id}', 'absent')" class="w-20 py-1.5 rounded-lg text-[9px] font-bold transition-all border ${isAbsent ? 'bg-rose-500 text-white border-rose-600 shadow-md shadow-rose-500/30' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-rose-50'}">
+                            <i class="fa-solid fa-xmark mr-1"></i> Absent
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteStaff(staffId) { document.getElementById('staffToDeleteId').value = staffId; openModal('confirmDeleteModal'); }
+        function executeDeleteStaff() {
+            const staffId = document.getElementById('staffToDeleteId').value;
+            if(!staffId) return;
+            window.state.staff = window.state.staff.filter(s => s.id !== staffId);
+            window.state.advances = window.state.advances.filter(a => a.staffId !== staffId);
+            for (let date in window.state.attendance) if (window.state.attendance[date][staffId]) delete window.state.attendance[date][staffId];
+            if(window.state.selectedStaffId === staffId) window.state.selectedStaffId = null;
+            saveToCloud(); 
+            closeModal('confirmDeleteModal'); 
+            renderAttendanceTab(document.getElementById('staffSearchInput').value); 
+            updateDashboardStats();
+            if(!document.getElementById('tab-register').classList.contains('hidden')) { renderStaffPills(); renderIndividualRegister(); }
+            showToast("Staff deleted permanently", "success");
+        }
+
+        async function markAttendance(staffId, status) {
+            const dateStr = formatDateForInput(window.state.currentDate);
+            
+            const hasAccess = await checkSubscriptionStatus();
+            
+            if (!hasAccess) {
+                document.getElementById('subscriptionScreen').classList.remove('hidden');
+                hideMainDashboard();
+                showToast("Recharge expired! Please renew your plan.", "error");
+                return; 
+            }
+
+            if (!window.state.attendance[dateStr]) window.state.attendance[dateStr] = {};
+            
+            if (window.state.attendance[dateStr][staffId] === status) {
+                 delete window.state.attendance[dateStr][staffId];
+            } else {
+                 window.state.attendance[dateStr][staffId] = status;
+            }
+            
+            saveToCloud(); 
+            renderAttendanceTab(document.getElementById('staffSearchInput').value); 
+            updateDashboardStats();
+        }
+
+        function updateDashboardStats() {
+            const dateStr = formatDateForInput(window.state.currentDate);
+
+            let presentToday = 0; let absentToday = 0;
+
+            if (window.state.attendance[dateStr]) {
+                Object.keys(window.state.attendance[dateStr]).forEach(staffId => {
+                    if (window.state.staff.find(s => s.id === staffId)) {
+                        if (window.state.attendance[dateStr][staffId] === 'present') presentToday++;
+                        if (window.state.attendance[dateStr][staffId] === 'absent') absentToday++;
+                    }
+                });
+            }
+
+            document.getElementById('stat-total-staff').textContent = window.state.staff.length;
+            document.getElementById('stat-present-today').textContent = presentToday;
+            document.getElementById('stat-absent-today').textContent = absentToday;
+        }
+
+        function filterStaffList() { renderAttendanceTab(document.getElementById('staffSearchInput').value); }
+
+        function saveNewStaff() {
+            const name = document.getElementById('newStaffName').value.trim();
+            const phone = document.getElementById('newStaffPhone').value.trim();
+            const salary = document.getElementById('newStaffSalary').value.trim();
+            const salaryType = document.querySelector('input[name="newStaffSalaryType"]:checked').value;
+            if (!name || !phone || !salary) { showToast("Please fill all fields", "error"); return; }
+            window.state.staff.push({ id: Date.now().toString(), name, phone, salary: parseFloat(salary), salaryType });
+            saveToCloud();
+            document.getElementById('newStaffName').value = ''; document.getElementById('newStaffPhone').value = ''; document.getElementById('newStaffSalary').value = '';
+            closeModal('addStaffModal'); showToast("Staff added successfully"); renderAttendanceTab(); updateDashboardStats();
+        }
+
+        function toggleReceiverInput() {
+            const type = document.querySelector('input[name="paymentType"]:checked').value;
+            const receiverContainer = document.getElementById('receiverNameContainer');
+            if (type === 'home') {
+                receiverContainer.classList.remove('hidden');
+            } else {
+                receiverContainer.classList.add('hidden');
+                document.getElementById('receiverName').value = '';
+            }
+        }
+
+        function prepAdvanceModal(staffId) {
+            document.getElementById('advanceStaffId').value = staffId;
+            document.getElementById('advanceAmount').value = '';
+            document.getElementById('advanceNote').value = '';
+            document.getElementById('receiverName').value = '';
+            
+            document.querySelector('input[name="paymentType"][value="staff"]').checked = true;
+            toggleReceiverInput();
+            
+            let defaultDate = new Date();
+            if (!document.getElementById('tab-register').classList.contains('hidden')) {
+                defaultDate = window.state.registerSelectedMonth;
+            } else if (!document.getElementById('tab-salary').classList.contains('hidden')) {
+                defaultDate = window.state.salarySelectedMonth;
+            } else {
+                defaultDate = window.state.currentDate;
+            }
+            
+            document.getElementById('advanceDate').value = formatDateForInput(defaultDate);
+            document.getElementById('advanceDateLabel').textContent = defaultDate.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            
+            openModal('addAdvanceModal');
+        }
+
+        function saveAdvance() {
+            const staffId = document.getElementById('advanceStaffId').value;
+            const amt = document.getElementById('advanceAmount').value;
+            const date = document.getElementById('advanceDate').value;
+            const paymentType = document.querySelector('input[name="paymentType"]:checked').value;
+            const receiverName = document.getElementById('receiverName').value.trim();
+            const note = document.getElementById('advanceNote').value.trim(); 
+
+            if (!amt || !date) { showToast("Enter amount and date", "error"); return; }
+            if (paymentType === 'home' && !receiverName) { showToast("Please enter name", "error"); return; }
+            
+            window.state.advances.push({ 
+                id: Date.now().toString(), 
+                staffId, 
+                amount: parseFloat(amt), 
+                date,
+                paymentType,
+                receiverName,
+                note
+            });
+            
+            saveToCloud(); 
+            closeModal('addAdvanceModal'); 
+            showToast("Payment saved successfully!", "success");
+            
+            if (!document.getElementById('tab-salary').classList.contains('hidden')) renderSalaryTab();
+            if (!document.getElementById('tab-register').classList.contains('hidden')) renderIndividualRegister();
+        }
+
+        function deleteAdvance(id) {
+            window.state.advances = window.state.advances.filter(a => a.id !== id);
+            saveToCloud();
+            renderIndividualRegister();
+            if (!document.getElementById('tab-salary').classList.contains('hidden')) {
+                renderSalaryTab();
+            }
+            showToast("Payment deleted successfully", "success");
+        }
+
+        function renderStaffPills() {
+            const container = document.getElementById('staffPillsContainer');
+            container.innerHTML = '';
+            if (window.state.staff.length === 0) { document.getElementById('selectedStaffBadge').textContent = 'None'; container.innerHTML = '<span class="text-xs text-slate-400">No staff available</span>'; return; }
+            if (!window.state.selectedStaffId || !window.state.staff.find(s => s.id === window.state.selectedStaffId)) window.state.selectedStaffId = window.state.staff[0].id;
+
+            window.state.staff.forEach(s => {
+                const isSel = s.id === window.state.selectedStaffId;
+                const cls = isSel ? "px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-[10px] font-bold shadow-md shadow-indigo-600/30 whitespace-nowrap transition" : "px-3 py-1.5 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl text-[10px] font-semibold hover:bg-slate-100 whitespace-nowrap transition";
+                container.innerHTML += `<button onclick="selectRegisterStaff('${s.id}')" class="${cls}">${s.name}</button>`;
+                if (isSel) document.getElementById('selectedStaffBadge').textContent = s.name;
+            });
+        }
+
+        function selectRegisterStaff(id) { window.state.selectedStaffId = id; renderStaffPills(); renderIndividualRegister(); }
+
+        function getLifetimeFinancials(staff) {
+            let totalEarned = 0;
+            let staffPaid = 0;
+            let homePaid = 0;
+            const isDaily = (staff.salaryType === 'daily');
+
+            for (let dateStr in window.state.attendance) {
+                if (window.state.attendance[dateStr][staff.id] === 'present') {
+                    if (isDaily) {
+                        totalEarned += staff.salary;
+                    } else {
+                        const [y, m] = dateStr.split('-');
+                        const daysInMonth = new Date(parseInt(y), parseInt(m), 0).getDate();
+                        totalEarned += (staff.salary / daysInMonth);
+                    }
+                }
+            }
+            
+            window.state.advances.forEach(a => {
+                if (a.staffId === staff.id) {
+                    if (a.paymentType === 'home') {
+                        homePaid += a.amount; 
+                    } else {
+                        staffPaid += a.amount; 
+                    }
+                }
+            });
+
+            return {
+                earned: Math.round(totalEarned),
+                staffPaid: Math.round(staffPaid),
+                homePaid: Math.round(homePaid),
+                paid: Math.round(staffPaid), 
+                balance: Math.round(totalEarned - staffPaid - homePaid) 
+            };
+        }
+
+        function renderIndividualRegister() {
+            const container = document.getElementById('individualLogContainer');
+            container.innerHTML = '';
+            if (!window.state.selectedStaffId) return;
+
+            const currentStaff = window.state.staff.find(s => s.id === window.state.selectedStaffId);
+            if (!currentStaff) return;
+
+            const year = window.state.registerSelectedMonth.getFullYear();
+            const month = window.state.registerSelectedMonth.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            let presentCount = 0; 
+            let monthStaffPaid = 0; 
+            let monthHomeSent = 0; 
+            let logsHTML = '';
+
+            for (let i = daysInMonth; i >= 1; i--) {
+                const loopDate = new Date(year, month, i);
+                const dateStr = formatDateForInput(loopDate);
+                const status = window.state.attendance[dateStr]?.[window.state.selectedStaffId];
+                
+                const dayAdvances = window.state.advances.filter(a => a.staffId === window.state.selectedStaffId && a.date === dateStr);
+                const staffDayAdvances = dayAdvances.filter(a => a.paymentType !== 'home'); 
+                
+                dayAdvances.forEach(a => {
+                    if(a.paymentType === 'home') monthHomeSent += a.amount;
+                    else monthStaffPaid += a.amount;
+                });
+                
+                if (status === 'present') presentCount++;
+                
+                if (status || staffDayAdvances.length > 0) {
+                    const statusColor = status === 'present' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 
+                                        status === 'absent' ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-slate-400 bg-slate-50 border-slate-200';
+                    const icon = status === 'present' ? 'fa-check' : status === 'absent' ? 'fa-xmark' : 'fa-minus';
+                    
+                    let advanceBadge = '';
+                    if (staffDayAdvances.length > 0) {
+                        advanceBadge = `<div class="flex flex-col gap-1.5 items-end">` + 
+                        staffDayAdvances.map(a => {
+                            const typeIcon = '<i class="fa-solid fa-user"></i>';
+                            const typeLabel = `Staff`;
+                            return `<div class="flex items-center gap-1">
+                                <span class="text-[9px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 shadow-sm flex items-center gap-1.5 justify-end text-right">
+                                    <span>${typeIcon} ${typeLabel}: <b class="ml-0.5">₹${a.amount}</b> ${a.note ? `<br><span class="text-[7px] text-rose-500/80 font-normal italic whitespace-normal mt-0.5 inline-block leading-tight">${a.note}</span>` : ''}</span>
+                                </span>
+                                <button onclick="deleteAdvance('${a.id}')" class="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-400 hover:text-rose-600 border border-rose-200 active:scale-90 transition shadow-sm flex items-center justify-center" title="Delete Payment"><i class="fa-solid fa-xmark text-[10px]"></i></button>
+                            </div>`;
+                        }).join('') + `</div>`;
+                    }
+                    
+                    logsHTML += `
+                        <div class="flex items-center justify-between p-2.5 bg-white border border-slate-100 rounded-xl shadow-sm mb-1.5">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg ${statusColor} flex items-center justify-center border shrink-0">
+                                    <i class="fa-solid ${icon} text-[10px]"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-800">${loopDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</p>
+                                    <p class="text-[8px] text-slate-500 uppercase font-semibold">${status || 'No Attendance'}</p>
+                                </div>
+                            </div>
+                            ${advanceBadge}
+                        </div>
+                    `;
+                }
+            }
+
+            const sType = currentStaff.salaryType || 'monthly';
+            const isDaily = (sType === 'daily');
+            let thisMonthEarned = isDaily ? (currentStaff.salary * presentCount) : ((currentStaff.salary / daysInMonth) * presentCount);
+            thisMonthEarned = Math.round(thisMonthEarned);
+            
+            const { earned: lifetimeEarned, staffPaid: lifetimeStaffPaid, homePaid: lifetimeHomePaid, paid: lifetimePaid, balance: lifetimeBalance } = getLifetimeFinancials(currentStaff);
+
+            const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+            const staffAdvancesThisMonth = window.state.advances.filter(a => a.staffId === currentStaff.id && a.date.startsWith(monthPrefix));
+            
+            let advanceHistoryText = '';
+            if(staffAdvancesThisMonth.length > 0) {
+                const advanceLogs = staffAdvancesThisMonth.map(a => {
+                    const icon = a.paymentType === 'home' ? '<i class="fa-solid fa-house"></i>' : '<i class="fa-solid fa-user"></i>';
+                    const lbl = a.paymentType === 'home' ? `Ghar (${a.receiverName || 'Family'})` : `Staff`;
+                    return `<div class="flex flex-col bg-slate-50 p-2 rounded-xl border border-slate-100 mt-1.5 shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-600 font-semibold text-[10px]"><i class="fa-regular fa-calendar mr-1"></i> ${new Date(a.date).getDate()} ${new Date(a.date).toLocaleDateString('en-GB', {month: 'short', year: 'numeric'})}</span>
+                            <div class="text-right flex items-center justify-end gap-1.5">
+                                <span class="text-[8px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold tracking-wide flex items-center gap-1">${icon} ${lbl}</span>
+                                <span class="text-rose-600 font-extrabold text-[11px]">₹${a.amount}</span>
+                                <button onclick="deleteAdvance('${a.id}')" class="w-6 h-6 rounded-lg bg-white hover:bg-rose-100 text-rose-400 hover:text-rose-600 border border-slate-200 active:scale-90 transition flex items-center justify-center shadow-sm" title="Delete Payment"><i class="fa-solid fa-xmark text-[10px]"></i></button>
+                            </div>
+                        </div>
+                        ${a.note ? `<div class="text-[8px] text-slate-400 italic mt-1 w-full text-left">${a.note}</div>` : ''}
+                    </div>`;
+                }).join('');
+                
+                advanceHistoryText = `<div class="mt-4 pt-3 border-t border-slate-200"><span class="text-[11px] text-rose-600 font-bold block mb-2"><i class="fa-solid fa-clock-rotate-left"></i> Payment History (Is Mahine):</span>${advanceLogs}</div>`;
+            }
+
+            container.innerHTML = `
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span class="text-[10px] font-bold text-slate-700">Monthly Summary</span>
+                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">${presentCount} / ${daysInMonth} Days Present</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 shadow-sm text-center flex flex-col justify-center">
+                        <span class="text-[8px] text-slate-500 font-semibold block uppercase">Earned (Is Mahine)</span>
+                        <span class="text-[10px] font-bold text-slate-700">${formatCurrency(thisMonthEarned)}</span>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100 text-center flex flex-col justify-center">
+                        <span class="text-[8px] text-slate-500 font-semibold block uppercase">Paid (Is Mahine)</span>
+                        <span class="text-[10px] font-bold text-slate-700">${formatCurrency(monthStaffPaid)}</span>
+                    </div>
+                    
+                    <div class="bg-indigo-50 p-1.5 rounded-lg border border-indigo-100 shadow-sm text-center flex flex-col justify-center">
+                        <span class="text-[8px] text-indigo-600 font-semibold block uppercase">Hath Me (Staff)</span>
+                        <span class="text-[10px] font-bold text-indigo-700">${formatCurrency(lifetimeStaffPaid)}</span>
+                    </div>
+                    
+                    <div class="bg-amber-50 p-1.5 rounded-lg border border-amber-100 shadow-sm text-center flex flex-col justify-center">
+                        <span class="text-[8px] text-amber-600 font-semibold block uppercase">Ghar Bheja</span>
+                        <span class="text-[10px] font-bold text-amber-700">${formatCurrency(lifetimeHomePaid)}</span>
+                    </div>
+                </div>
+
+                <div onclick="prepAdvanceModal('${currentStaff.id}')" class="bg-rose-50 p-1.5 rounded-lg border border-rose-100 shadow-sm text-center cursor-pointer active:scale-95 transition hover:bg-rose-100 group relative flex flex-col justify-center mb-3">
+                    <span class="text-[8px] text-rose-500 font-semibold flex justify-center items-center gap-1 uppercase">
+                        Total Paid (Kul Diya) <i class="fa-solid fa-plus-circle text-[9px] text-rose-400 group-hover:text-rose-600 transition"></i>
+                    </span>
+                    <span class="text-[10px] font-bold text-rose-600">${formatCurrency(lifetimePaid + lifetimeHomePaid)}</span>
+                </div>
+                
+                <div class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700 shadow-lg flex justify-between items-center mb-3">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Total Balance (Kul Baaki)</span>
+                    <span class="text-base font-extrabold ${lifetimeBalance < 0 ? 'text-rose-400' : 'text-emerald-400'}">${formatCurrency(lifetimeBalance)}</span>
+                </div>
+
+                ${logsHTML || `<div class="text-center py-6 text-slate-400 text-xs">No attendance recorded this month.</div>`}
+
+                ${advanceHistoryText}
+            `;
+        }
+
+        function renderSalaryTab() {
+            const container = document.getElementById('salaryBreakdownContainer');
+            container.innerHTML = '';
+            const year = window.state.salarySelectedMonth.getFullYear();
+            const month = window.state.salarySelectedMonth.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+            let grandTotalEarned = 0; 
+            let grandTotalStaffPaid = 0;
+            let grandTotalHomePaid = 0;
+            let grandTotalNet = 0;
+            let grandTotalPaid = 0;
+
+            window.state.staff.forEach(staff => {
+                let presentDays = 0;
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const dStr = `${monthPrefix}-${String(i).padStart(2, '0')}`;
+                    if (window.state.attendance[dStr]?.[staff.id] === 'present') presentDays++;
+                }
+
+                const staffAdvancesThisMonth = window.state.advances.filter(a => a.staffId === staff.id && a.date.startsWith(monthPrefix));
+                const thisMonthStaffPaid = Math.round(staffAdvancesThisMonth.filter(a => a.paymentType !== 'home').reduce((sum, a) => sum + a.amount, 0));
+
+                const sType = staff.salaryType || 'monthly';
+                const isDaily = (sType === 'daily');
+                let thisMonthEarned = isDaily ? (staff.salary * presentDays) : ((staff.salary / daysInMonth) * presentDays);
+                thisMonthEarned = Math.round(thisMonthEarned);
+
+                const { earned: lifetimeEarned, staffPaid: lifetimeStaffPaid, homePaid: lifetimeHomePaid, paid: lifetimePaid, balance: lifetimeBalance } = getLifetimeFinancials(staff);
+
+                grandTotalEarned += lifetimeEarned; 
+                grandTotalStaffPaid += lifetimeStaffPaid;
+                grandTotalHomePaid += lifetimeHomePaid;
+                grandTotalPaid += lifetimePaid;
+                grandTotalNet += lifetimeBalance; 
+
+                let baseLabel = isDaily ? `Base: ${formatCurrency(staff.salary)}/day` : `Base: ${formatCurrency(staff.salary)}/mo`;
+                
+                let advanceHistoryText = '';
+                if(staffAdvancesThisMonth.length > 0) {
+                    const advanceLogs = staffAdvancesThisMonth.map(a => {
+                        const icon = a.paymentType === 'home' ? '<i class="fa-solid fa-house"></i>' : '<i class="fa-solid fa-user"></i>';
+                        const lbl = a.paymentType === 'home' ? `Ghar (${a.receiverName || 'Family'})` : `Staff`;
+                        return `<div class="flex justify-between items-center bg-slate-50 p-1.5 rounded border border-slate-100 mt-1">
+                            <span class="text-slate-600 font-semibold text-[9px]">${new Date(a.date).getDate()} ${new Date(a.date).toLocaleDateString('en-GB', {month: 'short'})}</span>
+                            <div class="text-right flex items-center justify-end gap-1.5">
+                                <span class="text-[7.5px] bg-rose-100 text-rose-700 px-1 py-0.5 rounded font-semibold tracking-wide flex items-center gap-1">${icon} ${lbl}</span>
+                                <span class="text-rose-600 font-bold text-[10px]">₹${a.amount}</span>
+                                <button onclick="deleteAdvance('${a.id}')" class="w-5 h-5 rounded bg-white hover:bg-rose-100 text-rose-400 hover:text-rose-600 border border-slate-200 active:scale-90 transition flex items-center justify-center shadow-sm" title="Delete Payment"><i class="fa-solid fa-xmark text-[9px]"></i></button>
+                            </div>
+                            ${a.note ? `<div class="text-[7px] text-slate-400 italic mt-0.5 w-full basis-full">${a.note}</div>` : ''}
+                        </div>`;
+                    }).join('');
+                    advanceHistoryText = `<div class="mt-2 pt-2 border-t border-slate-100"><span class="text-[9px] text-rose-500 font-bold block mb-1"><i class="fa-solid fa-clock-rotate-left"></i> Payment History:</span>${advanceLogs}</div>`;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white p-3 rounded-2xl border border-slate-200/90 shadow-sm">
+                        <div class="flex justify-between items-start border-b border-slate-100 pb-2 mb-2">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-xs">${staff.name} <span class="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider ml-1 border border-slate-200">${sType}</span></h3>
+                                <span class="text-[9px] text-slate-500 font-medium">${baseLabel}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] font-bold text-emerald-600">${presentDays} / ${daysInMonth} Days</span>
+                                <span class="block text-[8px] text-slate-400 uppercase font-semibold">Present</span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 shadow-sm text-center flex flex-col justify-center">
+                                <span class="text-[8px] text-slate-500 uppercase font-semibold block">Earned (Is Mahine)</span>
+                                <span class="text-[10px] font-bold text-slate-700">${formatCurrency(thisMonthEarned)}</span>
+                            </div>
+                            
+                            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-100 text-center flex flex-col justify-center">
+                                <span class="text-[8px] text-slate-500 uppercase font-semibold block">Paid (Is Mahine)</span>
+                                <span class="text-[10px] font-bold text-slate-700">${formatCurrency(thisMonthStaffPaid)}</span>
+                            </div>
+
+                            <div class="bg-indigo-50 p-1.5 rounded-lg border border-indigo-100 shadow-sm text-center flex flex-col justify-center">
+                                <span class="text-[8px] text-indigo-600 font-semibold block uppercase">Hath Me (Staff)</span>
+                                <span class="text-[10px] font-bold text-indigo-700">${formatCurrency(lifetimeStaffPaid)}</span>
+                            </div>
+                            
+                            <div class="bg-amber-50 p-1.5 rounded-lg border border-amber-100 shadow-sm text-center flex flex-col justify-center">
+                                <span class="text-[8px] text-amber-600 font-semibold block uppercase">Ghar Bheja</span>
+                                <span class="text-[10px] font-bold text-amber-700">${formatCurrency(lifetimeHomePaid)}</span>
+                            </div>
+                        </div>
+
+                        <div onclick="prepAdvanceModal('${staff.id}')" class="bg-rose-50 p-1.5 rounded-lg border border-rose-100 shadow-sm text-center cursor-pointer active:scale-95 transition hover:bg-rose-100 group relative flex flex-col justify-center mb-3">
+                            <span class="text-[8px] text-rose-500 font-semibold flex justify-center items-center gap-1 uppercase">
+                                Total Paid (Kul Diya) <i class="fa-solid fa-plus-circle text-[9px] text-rose-400 group-hover:text-rose-600 transition"></i>
+                            </span>
+                            <span class="text-[10px] font-bold text-rose-600">${formatCurrency(lifetimePaid + lifetimeHomePaid)}</span>
+                        </div>
+
+                        <div class="flex justify-between items-center bg-slate-800 text-white p-3 rounded-xl border border-slate-700 shadow-lg">
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-slate-300">Total Balance (Kul Baaki)</span>
+                            <span class="text-base font-extrabold ${lifetimeBalance < 0 ? 'text-rose-400' : 'text-emerald-400'} block">${formatCurrency(lifetimeBalance)}</span>
+                        </div>
+                        ${advanceHistoryText}
+                    </div>
+                `;
+            });
+
+            if (window.state.staff.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">No payroll data available.</div>`;
+            }
+
+            document.getElementById('totalSalaryAmount').textContent = formatCurrency(grandTotalEarned);
+            document.getElementById('totalAdvanceAmount').textContent = formatCurrency(grandTotalStaffPaid);
+            document.getElementById('topPaidBreakdown').textContent = `Hath Me: ${formatCurrency(grandTotalStaffPaid)} | Ghar: ${formatCurrency(grandTotalHomePaid)}`;
+            document.getElementById('totalNetBalanceAmount').textContent = formatCurrency(grandTotalNet);
+            document.getElementById('totalStaffCountSalary').textContent = `${window.state.staff.length} Staff`;
+        }
+
+        function downloadSalaryPDF() {
+            showToast("Generating PDF...", "success");
+            const monthLabel = document.getElementById('salaryMonthLabel').innerText;
+            const printArea = document.createElement('div');
+            printArea.style.padding = '20px'; printArea.style.backgroundColor = '#ffffff'; printArea.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+            printArea.innerHTML = `<h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 20px; text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">Staff Payroll Report - ${monthLabel}</h2>`;
+            const summaryCard = document.getElementById('salarySummaryCard').cloneNode(true);
+            const breakdownContainer = document.getElementById('salaryBreakdownContainer').cloneNode(true);
+            summaryCard.classList.remove('shadow-xl', 'emerald-glow');
+            printArea.appendChild(summaryCard);
+            const spacer = document.createElement('div'); spacer.style.height = '15px'; printArea.appendChild(spacer);
+            printArea.appendChild(breakdownContainer);
+
+            const opt = { margin: 0.3, filename: `Payroll_Report_${monthLabel.replace(' ', '_')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(printArea).save().then(() => showToast("PDF Downloaded!", "success")).catch(err => { showToast("Error generating PDF", "error"); });
+        }
+
+        // Global Event Handlers
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.switchTab = switchTab;
+        window.changeDate = changeDate;
+        window.openCustomDatePicker = openCustomDatePicker;
+        window.prevCalendarMonth = prevCalendarMonth;
+        window.nextCalendarMonth = nextCalendarMonth;
+        window.selectCalendarDate = selectCalendarDate;
+        window.setCalendarToday = setCalendarToday;
+        window.openCustomMonthPicker = openCustomMonthPicker;
+        window.changeMonthPickerYear = changeMonthPickerYear;
+        window.selectMonthPickerMonth = selectMonthPickerMonth;
+        window.setMonthPickerCurrentMonth = setMonthPickerCurrentMonth;
+        window.filterStaffList = filterStaffList;
+        window.saveNewStaff = saveNewStaff;
+        window.toggleReceiverInput = toggleReceiverInput;
+        window.prepAdvanceModal = prepAdvanceModal;
+        window.saveAdvance = saveAdvance;
+        window.deleteAdvance = deleteAdvance;
+        window.deleteStaff = deleteStaff;
+        window.executeDeleteStaff = executeDeleteStaff;
+        window.markAttendance = markAttendance; 
+        window.selectRegisterStaff = selectRegisterStaff;
+        window.downloadSalaryPDF = downloadSalaryPDF;
+        window.setAuthMode = setAuthMode;
+        window.handleAuthSubmit = handleAuthSubmit;
+        window.openProfileModal = openProfileModal;
+        window.logoutProfile = logoutProfile;
+        
+        window.selectPlan = initiatePayment;
+        window.verifyPayment = verifyPayment;
+        window.checkStaffLimitAndOpen = checkStaffLimitAndOpen;
+        window.initiatePayment = initiatePayment;
+        window.payForStaff = payForStaff;
+
+    </script>
+</body>
+</html>
